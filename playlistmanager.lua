@@ -132,7 +132,6 @@ local settings = {
 
   -- reset cursor navigation when closing or opening playlist
   reset_cursor_on_close = true,
-  reset_cursor_on_open = true,
 
   --prefer to display titles for following files: "all", "url", "none". Sorting still uses filename.
   prefer_titles = "url",
@@ -853,9 +852,6 @@ end
 function showplaylist(duration)
   refresh_globals()
   if plen == 0 then return end
-  if not playlist_visible and settings.reset_cursor_on_open then
-    resetcursor()
-  end
 
   playlist_visible = true
   add_keybinds()
@@ -872,9 +868,6 @@ end
 function showplaylist_non_interactive(duration)
   refresh_globals()
   if plen == 0 then return end
-  if not playlist_visible and settings.reset_cursor_on_open then
-    resetcursor()
-  end
   playlist_visible = true
   draw_playlist()
   keybindstimer:kill()
