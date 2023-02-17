@@ -27,7 +27,7 @@ local settings = {
   key_removefile = "BS",
   key_closeplaylist = "ESC SHIFT+ENTER",
 
-  -- extra functionality keys
+  -- extra functionality dynamic keys
   key_sortplaylist = "",
   key_shuffleplaylist = "",
   key_reverseplaylist = "",
@@ -1040,7 +1040,7 @@ function save_playlist(filename)
       i=i+1
     end
     local saved_msg = "Playlist written to: "..savepath
-    if settings.display_osd_feedback then mp.osd_message(saved_msg) end
+    mp.osd_message(saved_msg)
     msg.info(saved_msg)
     file:close()
   end
@@ -1197,6 +1197,15 @@ function add_keybinds()
   bind_keys_forced(settings.key_playfile, 'playfile', playfile)
   bind_keys_forced(settings.key_removefile, 'removefile', removefile, "repeatable")
   bind_keys_forced(settings.key_closeplaylist, 'closeplaylist', remove_keybinds)
+  bind_keys_forced(settings.key_sortplaylist, "sortplaylist", function()
+    sortplaylist()
+    sort_mode = sort_mode + 1
+    if sort_mode > #sort_modes then sort_mode = 1 end
+  end)
+  bind_keys_forced(settings.key_reverseplaylist, "reverseplaylist", reverseplaylist)
+  bind_keys_forced(settings.key_shuffleplaylist, "shuffleplaylist", shuffleplaylist)
+  bind_keys_forced(settings.key_loadfiles, "loadfiles", playlist)
+  bind_keys_forced(settings.key_saveplaylist, "saveplaylist", activate_playlist_save)
 end
 
 function remove_keybinds()
@@ -1220,6 +1229,11 @@ function remove_keybinds()
     unbind_keys(settings.key_playfile, 'playfile')
     unbind_keys(settings.key_removefile, 'removefile')
     unbind_keys(settings.key_closeplaylist, 'closeplaylist')
+    unbind_keys(settings.key_sortplaylist, "sortplaylist")
+    unbind_keys(settings.key_reverseplaylist, "reverseplaylist")
+    unbind_keys(settings.key_shuffleplaylist, "shuffleplaylist")
+    unbind_keys(settings.key_loadfiles, "loadfiles")
+    unbind_keys(settings.key_saveplaylist, "saveplaylist")
   end
 end
 
@@ -1450,22 +1464,14 @@ end
 
 mp.register_script_message("playlistmanager", handlemessage)
 
-bind_keys(settings.key_sortplaylist, "sortplaylist", function()
-  sortplaylist()
-  sort_mode = sort_mode + 1
-  if sort_mode > #sort_modes then sort_mode = 1 end
-end)
-bind_keys(settings.key_shuffleplaylist, "shuffleplaylist", shuffleplaylist)
-bind_keys(settings.key_reverseplaylist, "reverseplaylist", reverseplaylist)
-bind_keys(settings.key_loadfiles, "loadfiles", playlist)
-bind_keys(settings.key_saveplaylist, "saveplaylist", activate_playlist_save)
-bind_keys(settings.key_showplaylist, "showplaylist", showplaylist)
 bind_keys(
   settings.key_peek_at_playlist,
   "peek_at_playlist",
   handle_complex_playlist_toggle,
   { complex=true }
 )
+
+bind_keys(settings.key_showplaylist, "showplaylist", toggle_playlist)
 
 mp.register_event("start-file", on_start_file)
 mp.register_event("file-loaded", on_file_loaded)
