@@ -674,8 +674,7 @@ function toggle_playlist(show_function)
   if playlist_visible then
     remove_keybinds()
   else
-    -- toggle always shows without timeout
-    show(0)
+    show(settings.playlist_display_timeout)
   end
 end
 
