@@ -1399,6 +1399,7 @@ function resolve_ytdl_title(filename)
                     local title = (is_playlist and '[playlist]: ' or '') .. json['title']
                     msg.verbose(filename .. " resolved to '" .. title .. "'")
                     title_table[filename] = title
+                    mp.set_property_native('user-data/playlistmanager/titles', title_table)
                     refresh_globals()
                     if playlist_visible then showplaylist() end
                 else
