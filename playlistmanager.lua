@@ -382,9 +382,6 @@ local sort_modes = {
     id="name-asc",
     title="name ascending",
     sort_fn=function (a, b, playlist)
-      if winapisort ~= nil then 
-        return winapisort(playlist[a].string, playlist[b].string)
-      end
       return alphanumsort(playlist[a].string, playlist[b].string)
     end,
   },
@@ -392,9 +389,6 @@ local sort_modes = {
     id="name-desc",
     title="name descending",
     sort_fn=function (a, b, playlist)
-      if winapisort ~= nil then 
-        return winapisort(playlist[b].string, playlist[a].string)
-      end
       return alphanumsort(playlist[b].string, playlist[a].string)
     end,
   },
@@ -1090,17 +1084,13 @@ function playlist(force_dir)
   if force_dir then dir = force_dir end
 
   local files = file_filter(utils.readdir(dir, "files"))
-  if winapisort ~= nil then
-    table.sort(files, winapisort)
-  else
-    table.sort(files, alphanumsort)
-  end
-  
-  
+
   if files == nil then
     msg.verbose("no files in directory")
     return
   end
+
+  table.sort(files, alphanumsort)
 
   local filenames = get_playlist_filenames_set()
   local c, c2 = 0,0
@@ -1251,12 +1241,18 @@ function save_playlist(filename)
 end
 
 function alphanumsort(a, b)
-  local function padnum(d)
-    local dec, n = string.match(d, "(%.?)0*(.+)")
-    return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
+  if winapisort ~= nil then
+    winapisort(a, b)
+  else
+    -- alphanum sorting for humans in Lua
+    -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
+    local function padnum(d)
+      local dec, n = string.match(d, "(%.?)0*(.+)")
+      return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
+    end
+    return tostring(a):lower():gsub("%.?%d+", padnum) .. ("%3d"):format(#b)
+        < tostring(b):lower():gsub("%.?%d+", padnum) .. ("%3d"):format(#a)
   end
-  return tostring(a):lower():gsub("%.?%d+",padnum)..("%3d"):format(#b)
-       < tostring(b):lower():gsub("%.?%d+",padnum)..("%3d"):format(#a)
 end
 
 -- fast sort algo from https://github.com/zsugabubus/dotfiles/blob/master/.config/mpv/scripts/playlist-filtersort.lua
